@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinema Booking System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <h1>MyCinema</h1>
+        <div>
+            <button onclick="chuyenTrang('home')">Trang chủ</button>
+            <button onclick="chuyenTrang('login')">Đăng nhập</button>
+            <button onclick="chuyenTrang('register')">Đăng ký</button>
+        </div>
+    </nav>
+
+    <div id="home" class="container">
+        <h2>Phim đang chiếu</h2>
+        <div id="movie-list" class="grid-container">
+            </div>
+    </div>
+
+    <div id="movie-detail" class="container hidden">
+        <button onclick="chuyenTrang('home')">← Quay lại</button>
+        <div id="detail-content">
+            </div>
+        
+        <div id="booking-section">
+            <h3>Đặt vé</h3>
+            <label>Chọn suất chiếu:</label>
+            <select id="schedule-select"></select>
+            <br><br>
+            <button onclick="datVe()">Xác nhận đặt vé</button>
+        </div>
+    </div>
+
+    <div id="login" class="container hidden">
+        <h2>Đăng nhập</h2>
+        <input type="email" id="login-email" placeholder="Email">
+        <input type="password" id="login-pass" placeholder="Mật khẩu">
+        <button onclick="dangNhap()">Login</button>
+    </div>
+
+    <div id="register" class="container hidden">
+        <h2>Đăng ký thành viên</h2>
+        <input type="text" id="reg-fullname" placeholder="Họ tên">
+        <input type="text" id="reg-username" placeholder="Tên đăng nhập">
+        <input type="email" id="reg-email" placeholder="Email">
+        <input type="password" id="reg-pass" placeholder="Mật khẩu">
+        <button onclick="dangKy()">Register</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
