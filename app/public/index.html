@@ -3,53 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinema Booking System</title>
+    <title>Mega Cinema - Hệ Thống Đặt Vé</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav>
-        <h1>MyCinema</h1>
-        <div>
-            <button onclick="chuyenTrang('home')">Trang chủ</button>
-            <button onclick="chuyenTrang('login')">Đăng nhập</button>
-            <button onclick="chuyenTrang('register')">Đăng ký</button>
+
+    <header>
+        <div class="logo">🎬 MEGA CINEMA</div>
+        <nav>
+            <a href="#" onclick="renderMovies()">Trang Chủ</a>
+            <div id="user-panel">
+                </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="section-header">
+            <h2 id="page-title">Phim Đang Chiếu</h2>
+            <input type="text" id="search-box" placeholder="Tìm tên phim..." onkeyup="filterMovies()">
         </div>
-    </nav>
+        <div id="movie-container" class="movie-grid"></div>
+    </main>
 
-    <div id="home" class="container">
-        <h2>Phim đang chiếu</h2>
-        <div id="movie-list" class="grid-container">
-            </div>
-    </div>
+    <div id="booking-modal" class="modal hidden">
+        <div class="modal-content booking-content">
+            <span class="close-btn" onclick="closeModal('booking-modal')">&times;</span>
+            <div class="booking-layout">
+                <div class="movie-info-side">
+                    <img id="modal-poster" src="" alt="Poster">
+                    <h2 id="modal-title"></h2>
+                    <p id="modal-category" class="tag"></p>
+                    <p><strong>Thời lượng:</strong> <span id="modal-duration"></span> phút</p>
+                    <p id="modal-desc"></p>
+                    
+                    <div class="schedule-selector">
+                        <label>Chọn suất chiếu:</label>
+                        <select id="schedule-select" onchange="loadSeatMap()">
+                            </select>
+                    </div>
+                </div>
 
-    <div id="movie-detail" class="container hidden">
-        <button onclick="chuyenTrang('home')">← Quay lại</button>
-        <div id="detail-content">
+                <div class="seat-selection-side">
+                    <div class="screen">MÀN HÌNH</div>
+                    <div id="seat-map-container">
+                        </div>
+                    <div class="legend">
+                        <div class="seat available"></div> <small>Trống</small>
+                        <div class="seat selected"></div> <small>Đang chọn</small>
+                        <div class="seat occupied"></div> <small>Đã bán</small>
+                    </div>
+                    <div class="summary">
+                        <p>Ghế chọn: <span id="selected-seats-text">---</span></p>
+                        <p>Tổng tiền: <span id="total-price">0</span> VND</p>
+                        <button class="btn-checkout" onclick="handleBooking()">XÁC NHẬN ĐẶT VÉ</button>
+                    </div>
+                </div>
             </div>
-        
-        <div id="booking-section">
-            <h3>Đặt vé</h3>
-            <label>Chọn suất chiếu:</label>
-            <select id="schedule-select"></select>
-            <br><br>
-            <button onclick="datVe()">Xác nhận đặt vé</button>
         </div>
     </div>
 
-    <div id="login" class="container hidden">
-        <h2>Đăng nhập</h2>
-        <input type="email" id="login-email" placeholder="Email">
-        <input type="password" id="login-pass" placeholder="Mật khẩu">
-        <button onclick="dangNhap()">Login</button>
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content auth-content">
+            <span class="close-btn" onclick="closeModal('login-modal')">&times;</span>
+            <h2>Đăng Nhập</h2>
+            <form onsubmit="handleLogin(event)">
+                <input type="text" id="login-username" placeholder="Tên đăng nhập" required>
+                <input type="password" id="login-password" placeholder="Mật khẩu" required>
+                <button type="submit" class="btn-checkout">Đăng Nhập</button>
+            </form>
+            <p class="auth-switch">
+                Chưa có tài khoản? <a href="#" onclick="switchToRegister()">Đăng ký ngay</a>
+            </p>
+        </div>
     </div>
 
-    <div id="register" class="container hidden">
-        <h2>Đăng ký thành viên</h2>
-        <input type="text" id="reg-fullname" placeholder="Họ tên">
-        <input type="text" id="reg-username" placeholder="Tên đăng nhập">
-        <input type="email" id="reg-email" placeholder="Email">
-        <input type="password" id="reg-pass" placeholder="Mật khẩu">
-        <button onclick="dangKy()">Register</button>
+    <div id="register-modal" class="modal hidden">
+        <div class="modal-content auth-content">
+            <span class="close-btn" onclick="closeModal('register-modal')">&times;</span>
+            <h2>Đăng Ký Tài Khoản</h2>
+            <form onsubmit="handleRegister(event)">
+                <input type="text" id="reg-fullname" placeholder="Họ và tên đầy đủ" required>
+                <input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền)" required>
+                <input type="email" id="reg-email" placeholder="Email" required>
+                <input type="password" id="reg-password" placeholder="Mật khẩu" required>
+                <input type="password" id="reg-confirm-pass" placeholder="Nhập lại mật khẩu" required>
+                <button type="submit" class="btn-checkout">Đăng Ký</button>
+            </form>
+            <p class="auth-switch">
+                Đã có tài khoản? <a href="#" onclick="switchToLogin()">Đăng nhập</a>
+            </p>
+        </div>
     </div>
 
     <script src="script.js"></script>
