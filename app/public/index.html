@@ -13,7 +13,7 @@
     <header>
         <div class="logo">🎬 T1F1 CINEMA</div>
         <nav>
-            <a href="#" onclick="renderMovies()">Trang Chủ</a>
+            <a href="/" onclick="">Trang Chủ</a>
             <div id="user-panel">
                 </div>
         </nav>
@@ -75,8 +75,8 @@
             <span class="close-btn" onclick="closeModal('login-modal')">&times;</span>
             <h2>Đăng Nhập</h2>
             <form onsubmit="handleLogin(event)">
-                <input type="text" id="login-username" placeholder="Tên đăng nhập" required>
-                <input type="password" id="login-password" placeholder="Mật khẩu" required>
+                <input type="email" id="login-email" placeholder="Email" required autocomplete="email">
+                <input type="password" id="login-password" placeholder="Mật khẩu" required autocomplete="current-password">
                 <button type="submit" class="btn-checkout">Đăng Nhập</button>
             </form>
             <p class="auth-switch">
@@ -91,10 +91,10 @@
             <h2>Đăng Ký Tài Khoản</h2>
             <form onsubmit="handleRegister(event)">
                 <input type="text" id="reg-fullname" placeholder="Họ và tên đầy đủ" required>
-                <input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền)" required>
-                <input type="email" id="reg-email" placeholder="Email" required>
-                <input type="password" id="reg-password" placeholder="Mật khẩu" required>
-                <input type="password" id="reg-confirm-pass" placeholder="Nhập lại mật khẩu" required>
+                <input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền)" required autocomplete="username">
+                <input type="email" id="reg-email" placeholder="Email" required autocomplete="email">
+                <input type="password" id="reg-password" placeholder="Mật khẩu" required autocomplete="new-password">
+                <input type="password" id="reg-confirm-pass" placeholder="Nhập lại mật khẩu" required autocomplete="new-password">
                 <button type="submit" class="btn-checkout">Đăng Ký</button>
             </form>
             <p class="auth-switch">

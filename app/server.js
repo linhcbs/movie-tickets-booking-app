@@ -80,7 +80,7 @@ app.get('/api/movies/:movieID/', async (req, res) => {
     }
 });
 
-// Lấy lịch chiếu của một bộ phim theo ID
+// Lấy lịch chiếu của một bộ phim theo ID phim
 app.get('/api/movies/:movieID/schedules', async (req, res) => {
     try {
         const pool = await poolPromise;
@@ -88,6 +88,22 @@ app.get('/api/movies/:movieID/schedules', async (req, res) => {
             .input('movieId', sql.Int, req.params.movieID) // Truyền ID từ URL vào query
             .query(`
                 SELECT * FROM MovieSchedules WHERE MovieID = @movieId
+            `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Lấy lịch chiếu theo ID lịch chiếu
+app.get('/api/schedules/:scheduleID', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('scheduleId', sql.Int, req.params.scheduleID) // Truyền ID từ URL vào query
+            .query(`
+                SELECT * FROM MovieSchedules 
+                WHERE ScheduleID = @scheduleId;
             `);
         res.json({ success: true, data: result.recordset });
     } catch (err) {

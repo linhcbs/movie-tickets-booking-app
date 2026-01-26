@@ -24,7 +24,7 @@ let dbMovies = [];
 let dbSchedules = [];
 let dbUsers = [];
 let dbTickets = [];
-let currentUser = [];
+let currentUser = null;
 
 let currentMovie = null;
 let currentSchedule = null;
@@ -71,7 +71,7 @@ function updateUserPanel() {
     const panel = document.getElementById('user-panel');
     if (currentUser) {
         panel.innerHTML = `
-            <span class="user-greeting">Xin chào, ${currentUser.name}</span>
+            <span class="user-greeting">Xin chào, ${currentUser.Fullname}</span>
             <button class="btn-login" style="background:#555" onclick="logout()">Thoát</button>
         `;
     } else {
@@ -79,67 +79,82 @@ function updateUserPanel() {
     }
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
-    const u = document.getElementById('login-username').value;
-    const p = document.getElementById('login-password').value;
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
 
-    const user = dbUsers.find(x => x.user === u && x.pass === p);
-    if (user) {
-        currentUser = user;
-        saveData('cinema_currentUser', currentUser);
-        closeModal('login-modal');
-        updateUserPanel();
-        alert(`Chào mừng ${user.name} quay trở lại!`);
-    } else {
-        alert("Sai tên đăng nhập hoặc mật khẩu!");
+    try {
+        const response = await fetch('/api/customers/login/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            currentUser = result.data;
+            // console.log(currentUser)
+            closeModal('login-modal');
+            updateUserPanel();
+            alert(`Chào mừng ${result.data.Fullname} quay trở lại!`);
+            // Clear input fields
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+        } else {
+            alert(result.error || "Sai email hoặc mật khẩu!");
+        }
+    } catch (error) {
+        alert("Lỗi kết nối server: " + error.message);
     }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
-    const name = document.getElementById('reg-fullname').value;
-    const user = document.getElementById('reg-username').value;
+    const fullname = document.getElementById('reg-fullname').value;
+    const username = document.getElementById('reg-username').value;
     const email = document.getElementById('reg-email').value;
-    const pass = document.getElementById('reg-password').value;
+    const password = document.getElementById('reg-password').value;
     const confirmPass = document.getElementById('reg-confirm-pass').value;
 
-    if (pass !== confirmPass) {
+    if (password !== confirmPass) {
         alert("Mật khẩu nhập lại không khớp!");
         return;
     }
 
-    // Kiểm tra trùng username
-    if (dbUsers.some(u => u.user === user)) {
-        alert("Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.");
-        return;
+    try {
+        const response = await fetch('/api/customers/register/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, email, fullname })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert("Đăng ký thành công! Bạn có thể đăng nhập ngay.");
+            closeModal('register-modal');
+            openModal('login-modal');
+            
+            // Điền sẵn email cho tiện
+            document.getElementById('login-username').value = email;
+            
+            // Clear input fields
+            document.getElementById('reg-fullname').value = '';
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-email').value = '';
+            document.getElementById('reg-password').value = '';
+            document.getElementById('reg-confirm-pass').value = '';
+        } else {
+            alert(result.error || "Đăng ký thất bại!");
+        }
+    } catch (error) {
+        alert("Lỗi kết nối server: " + error.message);
     }
-
-    // Tạo user mới
-    const newUser = {
-        id: dbUsers.length + 1,
-        user: user,
-        pass: pass,
-        name: name,
-        email: email
-    };
-
-    // Lưu vào mảng và Storage
-    dbUsers.push(newUser);
-    saveData('cinema_users', dbUsers);
-
-    alert("Đăng ký thành công! Bạn có thể đăng nhập ngay.");
-    closeModal('register-modal');
-    openModal('login-modal');
-
-    // Điền sẵn username cho tiện
-    document.getElementById('login-username').value = user;
 }
 
 function logout() {
     if (confirm("Bạn có chắc muốn đăng xuất?")) {
         currentUser = null;
-        saveData('cinema_currentUser', null);
         updateUserPanel();
         window.location.reload();
     }
@@ -182,20 +197,22 @@ function openBookingModal(movie) {
     }
 }
 
-function loadSeatMap() {
+async function loadSeatMap() {
     const scheduleId = parseInt(document.getElementById('schedule-select').value);
     if (!scheduleId) return;
 
-    currentSchedule = dbSchedules.find(s => s.id === scheduleId);
-    selectedSeats = [];
-    updateSummary();
+    clearSummary();
 
-    // Lấy danh sách ghế đã đặt từ DB
-    const bookedSeats = dbTickets
-        .filter(t => t.scheduleId === scheduleId)
-        .map(t => t.seat);
-
+    // Hiển thị "Đang tải..." trước
     const container = document.getElementById('seat-map-container');
+    container.innerHTML = '<p style=" padding:20px; font-size:16px; width:100%;">Đang tải...</p>';
+
+    // Lấy thông tin ghế đã đặt ở lịch chiếu này
+    let rawSelectedSeats = await fetchData(`/api/schedules/${scheduleId}/booked-seats`);
+    let schedule = await fetchData(`/api/schedules/${scheduleId}`);
+    const bookedSeats = rawSelectedSeats.map(s => s.SeatNumber);
+
+    // Sau khi load xong, render ghế
     container.innerHTML = "";
     container.style.gridTemplateColumns = "repeat(10, 1fr)"; // 10 ghế/hàng
 
@@ -207,32 +224,50 @@ function loadSeatMap() {
             const seatDiv = document.createElement('div');
             seatDiv.className = 'seat';
             seatDiv.innerText = seatCode;
+            seatDiv.dataset.seatCode = seatCode;
 
             if (bookedSeats.includes(seatCode)) {
                 seatDiv.classList.add('occupied');
             } else {
-                seatDiv.onclick = () => toggleSeat(seatDiv, seatCode);
+                seatDiv.onclick = () => toggleSeat(seatDiv, seatCode, schedule[0]);
             }
+
             container.appendChild(seatDiv);
         }
     });
+
 }
 
-function toggleSeat(el, code) {
+function toggleSeat(el, code, schedule) {
     if (el.classList.contains('selected')) {
         el.classList.remove('selected');
-        selectedSeats = selectedSeats.filter(s => s !== code);
+
     } else {
         el.classList.add('selected');
-        selectedSeats.push(code);
     }
-    updateSummary();
+    updateSummary(schedule);
 }
 
-function updateSummary() {
-    document.getElementById('selected-seats-text').innerText = selectedSeats.length ? selectedSeats.join(', ') : '---';
-    const total = selectedSeats.length * (currentSchedule ? currentSchedule.price : 0);
+function clearSummary() {
+    document.getElementById('total-price').innerText = '0';
+    document.getElementById('selected-seats-text').innerText = '---';
+    selectedSeats = [];
+}
+
+function updateSummary(currentSchedule = currentSchedule) {
+    
+    let selected_seats = document.querySelectorAll('.seat.selected')
+    const total = (selected_seats.length - 1) * (currentSchedule ? currentSchedule.TicketPrice : 0); // tru cho legends
     document.getElementById('total-price').innerText = total.toLocaleString();
+
+    let selected_seats_array = [];
+
+    for (let i = 0; i < selected_seats.length-1; i++) {
+        selected_seats_array.push(selected_seats[i].dataset.seatCode);
+    }
+
+    document.getElementById('selected-seats-text').innerText = selected_seats_array.length ? selected_seats_array.join(', ') : '---';
+
 }
 
 function handleBooking() {
@@ -276,7 +311,7 @@ async function initializeApp() {
     dbSchedules = await fetchData('/api/schedules');
     dbUsers = [];
     dbTickets = [];
-    currentUser = [];
+    currentUser = null;
 
     renderMovies(dbMovies);
 }
