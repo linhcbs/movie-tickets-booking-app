@@ -20,7 +20,7 @@ async function fetchData(url) {
 }
 
 // Khởi tạo các biến Global
-let dbMovies =  fetchData('api/movies');
+let dbMovies = [];
 let dbSchedules = [];
 let dbUsers = [];
 let dbTickets = [];
@@ -131,13 +131,13 @@ function handleRegister(e) {
     alert("Đăng ký thành công! Bạn có thể đăng nhập ngay.");
     closeModal('register-modal');
     openModal('login-modal');
-    
+
     // Điền sẵn username cho tiện
     document.getElementById('login-username').value = user;
 }
 
 function logout() {
-    if(confirm("Bạn có chắc muốn đăng xuất?")) {
+    if (confirm("Bạn có chắc muốn đăng xuất?")) {
         currentUser = null;
         saveData('cinema_currentUser', null);
         updateUserPanel();
@@ -160,15 +160,15 @@ function switchToLogin() {
 function openBookingModal(movie) {
     currentMovie = movie;
     openModal('booking-modal');
-    
-    document.getElementById('modal-poster').src = movie.poster;
-    document.getElementById('modal-title').innerText = movie.name;
-    document.getElementById('modal-category').innerText = movie.cat;
-    document.getElementById('modal-duration').innerText = Math.floor(movie.dur / 60);
-    document.getElementById('modal-desc').innerText = movie.desc;
 
-    const schedules = dbSchedules.filter(s => s.movieId === movie.id);
-    const select = document.getElementById('schedule-select');
+    document.getElementById('modal-poster').src = movie.MoviePosterURL;
+    document.getElementById('modal-title').innerText = movie.MovieName;
+    document.getElementById('modal-category').innerText = movie.MovieCategory;
+    document.getElementById('modal-duration').innerText = Math.floor(movie.MovieDuration / 60);
+    document.getElementById('modal-desc').innerText = movie.MovieDescription;
+
+    const schedules = dbSchedules.filter(s => s.MovieID === movie.MovieID);
+    const select = document.getElementById('schedule-select');  
     select.innerHTML = "";
 
     if (schedules.length === 0) {
@@ -176,7 +176,7 @@ function openBookingModal(movie) {
         document.getElementById('seat-map-container').innerHTML = "<p style='text-align:center; padding:20px'>Vui lòng chọn phim khác</p>";
     } else {
         schedules.forEach(s => {
-            select.innerHTML += `<option value="${s.id}">${s.time} - ${s.room} (${s.price.toLocaleString()}đ)</option>`;
+            select.innerHTML += `<option value="${s.ScheduleID}">${s.Showtime} - ${s.room} (${s.price.toLocaleString()}đ)</option>`;
         });
         loadSeatMap();
     }
@@ -199,10 +199,10 @@ function loadSeatMap() {
     container.innerHTML = "";
     container.style.gridTemplateColumns = "repeat(10, 1fr)"; // 10 ghế/hàng
 
-    const rows = ['A','B','C','D','E','F','G','H'];
+    const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     rows.forEach(row => {
         for (let i = 1; i <= 10; i++) {
-            const num = i < 10 ? '0'+i : i;
+            const num = i < 10 ? '0' + i : i;
             const seatCode = row + num;
             const seatDiv = document.createElement('div');
             seatDiv.className = 'seat';
@@ -246,7 +246,7 @@ function handleBooking() {
         return;
     }
 
-    if(confirm(`Xác nhận thanh toán ${document.getElementById('total-price').innerText} VND?`)) {
+    if (confirm(`Xác nhận thanh toán ${document.getElementById('total-price').innerText} VND?`)) {
         selectedSeats.forEach(seat => {
             dbTickets.push({
                 id: Date.now() + Math.random(),
@@ -259,7 +259,7 @@ function handleBooking() {
         saveData('cinema_tickets', dbTickets);
         alert("Đặt vé thành công!");
         closeModal('booking-modal');
-        renderMovies(); // Refresh để cập nhật lại ghế
+        renderMovies(dbMovies); // Refresh để cập nhật lại ghế
     }
 }
 
@@ -271,13 +271,13 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 async function initializeApp() {
     const container = document.getElementById('movie-container');
     container.innerHTML = '<p style="text-align: center; padding: 20px; font-size: 18px;">Đang tải...</p>';
-    
+
     dbMovies = await fetchData('/api/movies');
     dbSchedules = await fetchData('/api/schedules');
-    dbUsers = loadData('cinema_users', []);
-    dbTickets = loadData('cinema_tickets', []);
-    currentUser = loadData('cinema_currentUser', null);
-    
+    dbUsers = [];
+    dbTickets = [];
+    currentUser = [];
+
     renderMovies(dbMovies);
 }
 

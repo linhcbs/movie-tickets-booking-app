@@ -40,7 +40,8 @@ app.get('/api/schedules/', async (req, res) => {
                       m.MovieName,
                       ms.Showtime, 
                       ms.AvailableSeats, 
-                      ms.TicketPrice
+                      ms.TicketPrice,
+                      ms.RoomID
                   FROM MovieSchedules ms
                   JOIN Movies m ON ms.MovieID = m.MovieID;
             `);
