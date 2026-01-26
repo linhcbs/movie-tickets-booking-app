@@ -33,7 +33,7 @@ let selectedSeats = [];
 // --- LOGIC GIAO DIỆN CHÍNH ---
 
 // hiển thị danh sách phim
-function renderMovies(movies) {
+function renderMovies(movies = dbMovies) {
     const container = document.getElementById('movie-container');
     container.innerHTML = "";
     movies.forEach(m => {
@@ -176,7 +176,7 @@ function openBookingModal(movie) {
         document.getElementById('seat-map-container').innerHTML = "<p style='text-align:center; padding:20px'>Vui lòng chọn phim khác</p>";
     } else {
         schedules.forEach(s => {
-            select.innerHTML += `<option value="${s.ScheduleID}">${s.Showtime} - ${s.room} (${s.price.toLocaleString()}đ)</option>`;
+            select.innerHTML += `<option value="${s.ScheduleID}">${s.Showtime} - Phòng ${s.RoomID} (${s.TicketPrice.toLocaleString()} đồng)</option>`;
         });
         loadSeatMap();
     }
