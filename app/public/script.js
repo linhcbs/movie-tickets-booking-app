@@ -1,64 +1,30 @@
 // --- DATABASE KHỞI TẠO (MOCK DATA TỪ EXCEL) ---
 
-// 1. MOVIES (Đầy đủ từ file Movies Records)
-const defaultMovies = [
-    { id: 1, name: "Avengers: Endgame", cat: "Hành động", dur: 10860, poster: "https://upload.wikimedia.org/wikipedia/en/0/0d/Avengers_Endgame_poster.jpg", desc: "Các siêu anh hùng tập hợp để đảo ngược cú búng tay của Thanos." },
-    { id: 2, name: "The Dark Knight", cat: "Hành động", dur: 9120, poster: "https://upload.wikimedia.org/wikipedia/en/1/1c/The_Dark_Knight_%282008_film%29.jpg", desc: "Batman đối đầu với Joker." },
-    { id: 3, name: "Inception", cat: "Khoa học viễn tưởng", dur: 8880, poster: "https://upload.wikimedia.org/wikipedia/en/2/2e/Inception_%282010%29_theatrical_poster.jpg", desc: "Đánh cắp bí mật từ giấc mơ." },
-    { id: 6, name: "Spirited Away", cat: "Hoạt hình", dur: 7500, poster: "https://upload.wikimedia.org/wikipedia/en/d/db/Spirited_Away_Japanese_poster.png", desc: "Chihiro lạc vào thế giới linh hồn." },
-    { id: 17, name: "Titanic", cat: "Lãng mạn", dur: 11640, poster: "https://upload.wikimedia.org/wikipedia/en/1/19/Titanic_%28Official_Film_Poster%29.png", desc: "Tình yêu trên con tàu định mệnh." },
-    { id: 41, name: "Train to Busan", cat: "Kinh dị", dur: 7080, poster: "https://upload.wikimedia.org/wikipedia/en/9/95/Train_to_Busan.jpg", desc: "Chuyến tàu sinh tử chạy trốn Zombie." },
-    // Dữ liệu bổ sung từ file của bạn
-    { id: 45, name: "Arrival", cat: "Khoa học", dur: 6960, poster: "https://upload.wikimedia.org/wikipedia/en/d/df/Arrival_2016_film.jpg", desc: "Giao tiếp với người ngoài hành tinh." },
-    { id: 46, name: "Sing", cat: "Hoạt hình", dur: 6480, poster: "https://upload.wikimedia.org/wikipedia/en/b/bb/Sing_%282016_film%29_poster.jpg", desc: "Cuộc thi âm nhạc của các loài thú." },
-    { id: 47, name: "Minions", cat: "Hoạt hình", dur: 5460, poster: "https://upload.wikimedia.org/wikipedia/en/3/3d/Minions_poster.jpg", desc: "Các Minions đi tìm kiếm chủ nhân ác nhân mới." },
-    { id: 48, name: "Godzilla vs. Kong", cat: "Hành động", dur: 6780, poster: "https://upload.wikimedia.org/wikipedia/en/6/63/Godzilla_vs._Kong.png", desc: "Đại chiến giữa hai quái vật huyền thoại." },
-    { id: 5, name: "Parasite", cat: "Tâm lý", dur: 7920, poster: "https://upload.wikimedia.org/wikipedia/en/5/53/Parasite_%282019_film%29.png", desc: "Sự cộng sinh kỳ lạ giữa hai gia đình." }
-];
+async function fetchData(url) {
 
-// 2. SCHEDULES (Lịch chiếu giả lập)
-const defaultSchedules = [
-    { id: 101, movieId: 1, time: "2025-02-10 19:00", price: 90000, room: "R01" },
-    { id: 102, movieId: 1, time: "2025-02-10 21:30", price: 95000, room: "R02" },
-    { id: 103, movieId: 2, time: "2025-02-11 20:00", price: 85000, room: "R01" },
-    { id: 104, movieId: 6, time: "2025-02-11 18:00", price: 70000, room: "R03" },
-    { id: 105, movieId: 17, time: "2025-02-12 19:30", price: 100000, room: "VIP" },
-    { id: 106, movieId: 48, time: "2025-02-13 20:00", price: 120000, room: "IMAX" },
-    { id: 107, movieId: 47, time: "2025-02-14 10:00", price: 60000, room: "R05" }
-];
+    try {
+        const response = await fetch(url);
+        const payload = await response.json();
 
-// 3. USERS (Từ file Users Records)
-const defaultUsers = [
-    { id: 1, user: "johndoe", pass: "iloveyou123", name: "John Doe", email: "johndoe@gmail.com" },
-    { id: 2, user: "ladiesman217", pass: "qwerty456", name: "Sam Witwicky", email: "sam@gmail.com" },
-    { id: 3, user: "admin", pass: "abc123", name: "Admin", email: "admin@gmail.com" },
-    { id: 4, user: "yilongmao", pass: "chuateb0ngtoi12345", name: "Yi Long Mao", email: "yilong@gmail.com" }
-];
+        if (payload.success === false) {
+            console.error("Error response from " + url);
+            return [];
+        }
 
-// 4. TICKETS (Vé đã đặt sẵn)
-const defaultTickets = [
-    { id: 1, scheduleId: 101, seat: "A01", userId: 3 }, // Admin booked
-    { id: 2, scheduleId: 101, seat: "A02", userId: 3 },
-    { id: 3, scheduleId: 102, seat: "E05", userId: 2 }
-];
-
-// --- HỆ THỐNG LƯU TRỮ (LOCAL STORAGE) ---
-// Hàm giúp lấy dữ liệu: Nếu chưa có trong Storage thì lấy từ biến default
-function loadData(key, defaultValue) {
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : defaultValue;
-}
-
-function saveData(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
+        return payload.data;
+    }
+    catch (error) {
+        console.error("Error fetching data from " + url, error);
+        return [];
+    }
 }
 
 // Khởi tạo các biến Global
-let dbMovies = defaultMovies;
-let dbSchedules = defaultSchedules;
-let dbUsers = loadData('cinema_users', defaultUsers); // Load user từ storage để cập nhật user mới đăng ký
-let dbTickets = loadData('cinema_tickets', defaultTickets);
-let currentUser = loadData('cinema_currentUser', null);
+let dbMovies =  fetchData('api/movies');
+let dbSchedules = [];
+let dbUsers = [];
+let dbTickets = [];
+let currentUser = [];
 
 let currentMovie = null;
 let currentSchedule = null;
@@ -66,19 +32,20 @@ let selectedSeats = [];
 
 // --- LOGIC GIAO DIỆN CHÍNH ---
 
-function renderMovies() {
+// hiển thị danh sách phim
+function renderMovies(movies) {
     const container = document.getElementById('movie-container');
     container.innerHTML = "";
-    dbMovies.forEach(m => {
+    movies.forEach(m => {
         const div = document.createElement('div');
         div.className = "movie-card";
-        div.dataset.name = m.name.toLowerCase(); // Để phục vụ search
-        const durationMin = Math.floor(m.dur / 60);
+        div.dataset.name = m.MovieName.toLowerCase(); // Để phục vụ search
+        const durationMin = Math.floor(m.MovieDuration / 60);
         div.innerHTML = `
-            <img src="${m.poster}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
+            <img src="${m.MoviePosterURL}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
             <div class="movie-info">
-                <h3>${m.name}</h3>
-                <span class="tag">${m.cat}</span>
+                <h3>${m.MovieName}</h3>
+                <span class="tag">${m.MovieCategory}</span>
                 <span style="float:right; font-size:12px; color:#888">⏱ ${durationMin}p</span>
             </div>
         `;
@@ -301,4 +268,19 @@ function openModal(id) { document.getElementById(id).classList.remove('hidden');
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 // --- INIT ---
-renderMovies();
+async function initializeApp() {
+    const container = document.getElementById('movie-container');
+    container.innerHTML = '<p style="text-align: center; padding: 20px; font-size: 18px;">Đang tải...</p>';
+    
+    dbMovies = await fetchData('/api/movies');
+    dbSchedules = await fetchData('/api/schedules');
+    dbUsers = loadData('cinema_users', []);
+    dbTickets = loadData('cinema_tickets', []);
+    currentUser = loadData('cinema_currentUser', null);
+    
+    renderMovies(dbMovies);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+});
