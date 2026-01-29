@@ -103,6 +103,20 @@
         </div>
     </div>
 
+    <div id="success-modal" class="modal hidden">
+        <div class="modal-content success-content">
+            <div class="success-icon">✓</div>
+            <h2>Đặt Vé Thành Công!</h2>
+            <p id="success-message">Bạn đã đặt vé thành công.</p>
+            <div class="success-details">
+                <p><strong>Mã đơn hàng:</strong> <span id="order-id"></span></p>
+                <p><strong>Tổng tiền:</strong> <span id="order-total"></span> VND</p>
+                <p><strong>Ghế:</strong> <span id="order-seats"></span></p>
+            </div>
+            <button class="btn-checkout" onclick="closeSuccessModal()">Quay lại trang chủ</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

@@ -42,7 +42,7 @@ function renderMovies(movies = dbMovies) {
         div.dataset.name = m.MovieName.toLowerCase(); // Để phục vụ search
         const durationMin = Math.floor(m.MovieDuration / 60);
         div.innerHTML = `
-            <img src="${m.MoviePosterURL}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
+            <img src="${m.MoviePosterURL}" onerror="this.src='https://placeholder.co/300x450?text=No+Poster'">
             <div class="movie-info">
                 <h3>${m.MovieName}</h3>
                 <span class="tag">${m.MovieCategory}</span>
@@ -70,12 +70,17 @@ function filterMovies() {
 function updateUserPanel() {
     const panel = document.getElementById('user-panel');
     if (currentUser) {
+        // TRƯỜNG HỢP 1: Đã đăng nhập -> Hiện tên và nút Thoát
         panel.innerHTML = `
             <span class="user-greeting">Xin chào, ${currentUser.Fullname}</span>
             <button class="btn-login" style="background:#555" onclick="logout()">Thoát</button>
         `;
     } else {
-        panel.innerHTML = `<button class="btn-login" onclick="openModal('login-modal')">Đăng Nhập</button>`;
+        // TRƯỜNG HỢP 2: Chưa đăng nhập -> Hiện cả nút Đăng Nhập và Đăng Ký
+        panel.innerHTML = `
+            <button class="btn-login" onclick="openModal('login-modal')">Đăng Nhập</button>
+            <button class="btn-register" onclick="openModal('register-modal')">Đăng Ký</button>
+        `;
     }
 }
 
@@ -201,6 +206,7 @@ async function loadSeatMap() {
     const scheduleId = parseInt(document.getElementById('schedule-select').value);
     if (!scheduleId) return;
 
+    selectedSeats = [];
     clearSummary();
 
     // Hiển thị "Đang tải..." trước
@@ -241,9 +247,10 @@ async function loadSeatMap() {
 function toggleSeat(el, code, schedule) {
     if (el.classList.contains('selected')) {
         el.classList.remove('selected');
-
+        selectedSeats = selectedSeats.filter(s => s !== code);
     } else {
         el.classList.add('selected');
+        selectedSeats.push(code);
     }
     updateSummary(schedule);
 }
@@ -281,21 +288,41 @@ function handleBooking() {
         return;
     }
 
-    if (confirm(`Xác nhận thanh toán ${document.getElementById('total-price').innerText} VND?`)) {
+    const scheduleId = parseInt(document.getElementById('schedule-select').value);
+    const schedule = dbSchedules.find(s => s.ScheduleID === scheduleId);
+    const totalPrice = document.getElementById('total-price').innerText;
+
+    if (confirm(`Xác nhận thanh toán ${totalPrice} VND?`)) {
+        const orderId = Date.now();
         selectedSeats.forEach(seat => {
             dbTickets.push({
                 id: Date.now() + Math.random(),
-                scheduleId: currentSchedule.id,
+                scheduleId: schedule.ScheduleID,
                 seat: seat,
-                userId: currentUser.id,
+                userId: currentUser.CustomerID,
                 status: 'booked'
             });
         });
         saveData('cinema_tickets', dbTickets);
-        alert("Đặt vé thành công!");
+        
+        // Hiển thị modal thành công thay vì alert
+        showSuccessModal(orderId, totalPrice, selectedSeats);
+        
         closeModal('booking-modal');
         renderMovies(dbMovies); // Refresh để cập nhật lại ghế
     }
+}
+
+function showSuccessModal(orderId, totalPrice, seats) {
+    document.getElementById('order-id').innerText = orderId;
+    document.getElementById('order-total').innerText = totalPrice;
+    document.getElementById('order-seats').innerText = seats.join(', ');
+    openModal('success-modal');
+}
+
+function closeSuccessModal() {
+    closeModal('success-modal');
+    renderMovies(dbMovies);
 }
 
 // --- UTILS ---
