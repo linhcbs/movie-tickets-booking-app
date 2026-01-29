@@ -141,7 +141,7 @@ async function handleRegister(e) {
             openModal('login-modal');
             
             // Điền sẵn email cho tiện
-            document.getElementById('login-username').value = email;
+            document.getElementById('login-email').value = email;
             
             // Clear input fields
             document.getElementById('reg-fullname').value = '';
