@@ -119,6 +119,7 @@ app.get('/api/tickets/:userID', async (req, res) => {
             .input('CustomerID', sql.Int, req.params.userID) // Truyền ID từ URL vào query
             .query(`
                 SELECT 
+                    T.TicketID,
                     U.Fullname,
                     T.BookingDate,  
                     M.MovieName,

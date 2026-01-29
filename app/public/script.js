@@ -133,7 +133,7 @@ async function viewMyTickets() {
                             ${ticket.TicketStatus == 'booked' ? 'Đã Đặt ✅' : 'Đã Hủy ❌'}
                         </div>
 
-                        <button class="btn-cancel" onclick="cancelTicket(undefined)">Hủy Vé</button>
+                        <button class="btn-cancel" onclick="cancelTicket(${ticket.TicketID})" ${ticket.TicketStatus !== 'booked' ? 'disabled' : ''}>Hủy Vé</button>
                     </div>                `;
                 container.appendChild(ticketDiv);
             });
@@ -145,8 +145,35 @@ async function viewMyTickets() {
     }
 }
 
-function cancelTicket(ticketId) {
-    alert('Chức năng sắp được kích hoạt');
+async function cancelTicket(ticketId) {
+    if (!ticketId) {
+        alert('Không tìm thấy mã vé');
+        return;
+    }
+
+    if (!confirm('Bạn có chắc muốn hủy vé này? Tiền sẽ được hoàn lại.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/tickets/cancel/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticketId })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ Hủy vé thành công! Tiền đã được hoàn lại.');
+            // Reload danh sách vé
+            viewMyTickets();
+        } else {
+            alert('❌ Lỗi: ' + (result.error || 'Không thể hủy vé'));
+        }
+    } catch (error) {
+        alert('❌ Lỗi kết nối: ' + error.message);
+    }
 }
 
 async function handleLogin(e) {

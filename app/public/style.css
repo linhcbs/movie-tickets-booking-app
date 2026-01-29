@@ -602,11 +602,17 @@ input:focus {
     transition: 0.3s;
 }
 
-.btn-cancel:hover {
+.btn-cancel:hover:not(:disabled) {
     background: #ff3333;
     font-weight: bold;
 }
 
-.btn-cancel:active {
+.btn-cancel:active:not(:disabled) {
     transform: scale(0.95);
+}
+
+.btn-cancel:disabled {
+    background: #888;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
