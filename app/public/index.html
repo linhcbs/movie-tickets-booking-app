@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
     <header>
@@ -15,7 +17,7 @@
         <nav>
             <a href="/" onclick="">Trang Chủ</a>
             <div id="user-panel">
-                </div>
+            </div>
         </nav>
     </header>
 
@@ -37,18 +39,18 @@
                     <p id="modal-category" class="tag"></p>
                     <p><strong>Thời lượng:</strong> <span id="modal-duration"></span> phút</p>
                     <p id="modal-desc"></p>
-                    
+
                     <div class="schedule-selector">
                         <label>Chọn suất chiếu:</label>
                         <select id="schedule-select" onchange="loadSeatMap()">
-                            </select>
+                        </select>
                     </div>
                 </div>
 
                 <div class="seat-selection-side">
                     <div class="screen">MÀN HÌNH</div>
                     <div id="seat-map-container">
-                        </div>
+                    </div>
                     <div class="legend">
                         <div>
                             <div class="seat available"></div> <small>Trống</small>
@@ -61,9 +63,14 @@
                         </div>
                     </div>
                     <div class="summary">
+                        <p id="booking-loading"
+                            style="text-align: center; color: #00e5ff; margin-top: 10px; display: none;">
+                            ⏳ Đang xử lý...
+                        </p>
                         <p>Ghế chọn: <span id="selected-seats-text">---</span></p>
                         <p>Tổng tiền: <span id="total-price">0</span> VND</p>
-                        <button class="btn-checkout" onclick="handleBooking()">XÁC NHẬN ĐẶT VÉ</button>
+                        <button id="booking-btn" class="btn-checkout" onclick="handleBooking()">XÁC NHẬN ĐẶT VÉ</button>
+
                     </div>
                 </div>
             </div>
@@ -76,7 +83,8 @@
             <h2>Đăng Nhập</h2>
             <form onsubmit="handleLogin(event)">
                 <input type="email" id="login-email" placeholder="Email" required autocomplete="email">
-                <input type="password" id="login-password" placeholder="Mật khẩu" required autocomplete="current-password">
+                <input type="password" id="login-password" placeholder="Mật khẩu" required
+                    autocomplete="current-password">
                 <button type="submit" class="btn-checkout">Đăng Nhập</button>
             </form>
             <p class="auth-switch">
@@ -91,10 +99,12 @@
             <h2>Đăng Ký Tài Khoản</h2>
             <form onsubmit="handleRegister(event)">
                 <input type="text" id="reg-fullname" placeholder="Họ và tên đầy đủ" required>
-                <input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền)" required autocomplete="username">
+                <input type="text" id="reg-username" placeholder="Tên đăng nhập (viết liền)" required
+                    autocomplete="username">
                 <input type="email" id="reg-email" placeholder="Email" required autocomplete="email">
                 <input type="password" id="reg-password" placeholder="Mật khẩu" required autocomplete="new-password">
-                <input type="password" id="reg-confirm-pass" placeholder="Nhập lại mật khẩu" required autocomplete="new-password">
+                <input type="password" id="reg-confirm-pass" placeholder="Nhập lại mật khẩu" required
+                    autocomplete="new-password">
                 <button type="submit" class="btn-checkout">Đăng Ký</button>
             </form>
             <p class="auth-switch">
@@ -133,4 +143,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

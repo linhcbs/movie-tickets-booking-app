@@ -387,6 +387,12 @@ async function handleBooking() {
     if (confirm(`Xác nhận thanh toán ${totalPrice} VND?`)) {
         const orderId = Date.now();
         
+        // Hiển thị loading
+        const bookingBtn = document.getElementById('booking-btn');
+        const loadingText = document.getElementById('booking-loading');
+        bookingBtn.disabled = true;
+        loadingText.style.display = 'block';
+        
         try {
             // Gửi request cho mỗi ghế được chọn
             for (const seat of selectedSeats) {
@@ -403,6 +409,8 @@ async function handleBooking() {
                 const result = await response.json();
                 if (!result.success) {
                     alert(result.error || "Đặt vé thất bại!");
+                    bookingBtn.disabled = false;
+                    loadingText.style.display = 'none';
                     return;
                 }
             }
@@ -420,8 +428,14 @@ async function handleBooking() {
             
             closeModal('booking-modal');
             renderMovies(dbMovies); // Refresh để cập nhật lại ghế
+            
+            // Reset loading state
+            bookingBtn.disabled = false;
+            loadingText.style.display = 'none';
         } catch (error) {
             alert("Lỗi kết nối server: " + error.message);
+            bookingBtn.disabled = false;
+            loadingText.style.display = 'none';
         }
     }
 }
