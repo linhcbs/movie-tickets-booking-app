@@ -119,16 +119,19 @@ app.get('/api/tickets/:userID', async (req, res) => {
             .input('CustomerID', sql.Int, req.params.userID) // Truyền ID từ URL vào query
             .query(`
                 SELECT 
-                    t.TicketID,
-                    t.CustomerID,
-                    t.SeatNumber,
-                    t.RoomID,
-                    t.TicketStatus,
-                    t.BookingDate,
-                    ms.TicketPrice
-                FROM Tickets t
-                JOIN MovieSchedules ms ON t.ScheduleID = ms.ScheduleID
-                WHERE t.CustomerID = @CustomerID; 
+                    U.Fullname,
+                    T.BookingDate,  
+                    M.MovieName,
+                    MS.TicketPrice, 
+                    T.SeatNumber,
+                    MS.RoomID, 
+                    MS.Showtime,
+                    T.TicketStatus
+                FROM Tickets T
+                JOIN Users U ON T.CustomerID = U.UserID
+                JOIN MovieSchedules MS ON T.ScheduleID = MS.ScheduleID
+                JOIN Movies M ON MS.MovieID = M.MovieID
+                WHERE U.UserID = @CustomerID;
             `);
         res.json({ success: true, data: result.recordset });
     } catch (err) {
@@ -161,7 +164,7 @@ app.get('/api/schedules/:scheduleID/booked-seats', async (req, res) => {
  * roomId: nvarchar
  */
 app.post('/api/tickets/book/', async (req, res) => {
-    const { scheduleId, customerId, seatNumber, roomId } = req.body;
+    const { scheduleId, customerId, seatNumber } = req.body;
     
     try {
         const pool = await poolPromise;
@@ -178,12 +181,11 @@ app.post('/api/tickets/book/', async (req, res) => {
                 .input('cId', sql.Int, customerId)
                 .input('status', sql.NVarChar, 'booked')
                 .input('seat', sql.NVarChar, seatNumber)
-                .input('room', sql.NVarChar, roomId)
                 .query(`
-                    INSERT INTO Tickets (TicketID, ScheduleID, CustomerID, TicketStatus, SeatNumber, RoomID, BookingDate)
+                    INSERT INTO Tickets (TicketID, ScheduleID, CustomerID, TicketStatus, SeatNumber, BookingDate)
                     SELECT 
                         ISNULL(MAX(TicketID), 0) + 1, 
-                        @sId, @cId, @status, @seat, @room, GETDATE()
+                        @sId, @cId, @status, @seat, GETDATE()
                     FROM Tickets
                 `);
 

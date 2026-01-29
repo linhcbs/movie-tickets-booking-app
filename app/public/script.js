@@ -70,8 +70,9 @@ function filterMovies() {
 function updateUserPanel() {
     const panel = document.getElementById('user-panel');
     if (currentUser) {
-        // TRƯỜNG HỢP 1: Đã đăng nhập -> Hiện tên và nút Thoát
+        // TRƯỜNG HỢP 1: Đã đăng nhập -> Hiện tên, nút xem vé và nút Thoát
         panel.innerHTML = `
+            <button class="btn-login" style="background:#0066cc" onclick="viewMyTickets()">Vé Của Tôi</button>
             <span class="user-greeting">Xin chào, ${currentUser.Fullname}</span>
             <button class="btn-login" style="background:#555" onclick="logout()">Thoát</button>
         `;
@@ -82,6 +83,70 @@ function updateUserPanel() {
             <button class="btn-register" onclick="openModal('register-modal')">Đăng Ký</button>
         `;
     }
+}
+
+async function viewMyTickets() {
+    openModal('my-tickets-modal');
+    
+    const container = document.getElementById('tickets-list');
+    container.innerHTML = '<p style="text-align: center; padding: 20px;">Đang tải...</p>';
+
+    try {
+        const response = await fetch(`/api/tickets/${currentUser.UserID}`);
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            container.innerHTML = '';
+            result.data.forEach(ticket => {
+                const ticketDiv = document.createElement('div');
+                ticketDiv.className = 'ticket-item';
+                ticketDiv.innerHTML = `
+
+                <div class="ticket">
+                        <img src="./assets/ticket.png" alt="Ticket" class="ticket-image">
+                        <div class="ticket-text">
+                            <h4 class="cinema-name">T1F1 Cinema</h4>
+                            <div class="wrapper-box">
+                                <h2 class="movie-name">${ticket.MovieName}</h2>
+                                <h4 class="show-time">Thời gian chiếu: ${ticket.Showtime}</h4>
+                            </div>
+                            <div class="wrapper-box details">
+                                <div class="details-row">
+                                    <p><strong>Rạp:</strong> ${ticket.RoomID}</p>
+                                    <p><strong>Ghế:</strong> ${ticket.SeatNumber}</p>
+                                </div>
+                                <div class="details-row">
+                                    <p><strong>Đơn giá:</strong> ${ticket.TicketPrice.toLocaleString()} VND</p>
+                                </div>
+                                <p><strong>Ngày đặt:</strong> ${ticket.BookingDate}</p>
+                                <p><strong>Khách hàng:</strong>${ticket.Fullname}</p>
+                            </div>
+                            <div class="strip-container">
+                                <div class="star-strip" aria-hidden="true">
+                                    ★★★★★★
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width: 80px;">
+                        <div class="ticket-status">
+                            ${ticket.TicketStatus == 'booked' ? 'Đã Đặt ✅' : 'Đã Hủy ❌'}
+                        </div>
+
+                        <button class="btn-cancel" onclick="cancelTicket(undefined)">Hủy Vé</button>
+                    </div>                `;
+                container.appendChild(ticketDiv);
+            });
+        } else {
+            container.innerHTML = '<p style="text-align: center; padding: 20px;">Bạn chưa có vé nào.</p>';
+        }
+    } catch (error) {
+        container.innerHTML = '<p style="text-align: center; padding: 20px; color: red;">Lỗi kết nối: ' + error.message + '</p>';
+    }
+}
+
+function cancelTicket(ticketId) {
+    alert('Chức năng sắp được kích hoạt');
 }
 
 async function handleLogin(e) {
@@ -277,7 +342,7 @@ function updateSummary(currentSchedule = currentSchedule) {
 
 }
 
-function handleBooking() {
+async function handleBooking() {
     if (!currentUser) {
         alert("Vui lòng đăng nhập để đặt vé!");
         openModal('login-modal');
@@ -294,29 +359,54 @@ function handleBooking() {
 
     if (confirm(`Xác nhận thanh toán ${totalPrice} VND?`)) {
         const orderId = Date.now();
-        selectedSeats.forEach(seat => {
-            dbTickets.push({
-                id: Date.now() + Math.random(),
-                scheduleId: schedule.ScheduleID,
-                seat: seat,
-                userId: currentUser.CustomerID,
-                status: 'booked'
-            });
-        });
-        saveData('cinema_tickets', dbTickets);
         
-        // Hiển thị modal thành công thay vì alert
-        showSuccessModal(orderId, totalPrice, selectedSeats);
-        
-        closeModal('booking-modal');
-        renderMovies(dbMovies); // Refresh để cập nhật lại ghế
+        try {
+            // Gửi request cho mỗi ghế được chọn
+            for (const seat of selectedSeats) {
+                const response = await fetch('/api/tickets/book/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        scheduleId: scheduleId,
+                        customerId: currentUser.UserID,
+                        seatNumber: seat,
+                    })
+                });
+
+                const result = await response.json();
+                if (!result.success) {
+                    alert(result.error || "Đặt vé thất bại!");
+                    return;
+                }
+            }
+
+            // Hiển thị modal thành công thay vì alert
+            showSuccessModal(
+                orderId, 
+                totalPrice, 
+                selectedSeats,
+                currentMovie.MovieName,
+                schedule.Showtime,
+                currentUser.Fullname,
+                schedule.RoomID
+            );
+            
+            closeModal('booking-modal');
+            renderMovies(dbMovies); // Refresh để cập nhật lại ghế
+        } catch (error) {
+            alert("Lỗi kết nối server: " + error.message);
+        }
     }
 }
 
-function showSuccessModal(orderId, totalPrice, seats) {
+function showSuccessModal(orderId, totalPrice, seats, movieName, showtime, userName, roomId) {
     document.getElementById('order-id').innerText = orderId;
     document.getElementById('order-total').innerText = totalPrice;
     document.getElementById('order-seats').innerText = seats.join(', ');
+    document.getElementById('order-movie').innerText = movieName;
+    document.getElementById('order-showtime').innerText = showtime;
+    document.getElementById('order-user').innerText = userName;
+    document.getElementById('order-room').innerText = roomId;
     openModal('success-modal');
 }
 

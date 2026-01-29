@@ -170,6 +170,7 @@ main {
     border-radius: 10px;
     position: relative;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    
 }
 
 .booking-content {
@@ -349,8 +350,9 @@ input:focus {
     }
 }
 
-.legend, .legend div {
-    
+.legend,
+.legend div {
+
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -365,7 +367,8 @@ input:focus {
 #user-panel {
     display: flex;
     align-items: center;
-    gap: 15px; /* Khoảng cách giữa nút Đăng nhập và Đăng ký */
+    gap: 15px;
+    /* Khoảng cách giữa nút Đăng nhập và Đăng ký */
 }
 
 /* Style cho nút Đăng Ký (Viền trắng, nền trong suốt) */
@@ -390,7 +393,8 @@ input:focus {
 
 /* Đảm bảo nút Đăng nhập kích thước tương đồng */
 .btn-login {
-    font-size: 14px; /* Đồng bộ font size */
+    font-size: 14px;
+    /* Đồng bộ font size */
 }
 
 /* Success Modal */
@@ -413,6 +417,7 @@ input:focus {
         transform: scale(0);
         opacity: 0;
     }
+
     to {
         transform: scale(1);
         opacity: 1;
@@ -448,4 +453,160 @@ input:focus {
 .success-details span {
     color: #00e5ff;
     font-weight: bold;
+}
+
+/* Tickets Modal */
+.tickets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+
+}
+
+.ticket-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ticket {
+    margin: 10px 10px 10px 50px;
+    width: 600px;
+    height: 225px;
+    position: relative;
+    letter-spacing: 1px;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.ticket .cinema-name {
+    margin-bottom: 3px;
+}
+
+.ticket-text * {
+    padding: 0;
+    margin: 0;
+}
+
+.ticket .ticket-image {
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.ticket .ticket-text {
+    color: white;
+    position: absolute;
+    padding: 10px 25px;
+    width: 100%;
+    z-index: 2;
+}
+
+.ticket .cinema-name {
+    background-color: white;
+    width: 91%;
+    color: #DC371B;
+    padding-left: 5px;
+}
+
+.ticket .wrapper-box {
+    border: 1px solid white;
+    padding: 5px;
+    width: 90%;
+    border-radius: 3px;
+    display: block;
+}
+
+.ticket .wrapper-box:nth-child(3) {
+    margin-top: 5px;
+}
+
+.ticket .details {
+    height: 95px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+    width: 88.3%;
+    position: relative;
+}
+
+.tickets-content {
+    height: 85vh;
+    overflow: auto;
+    border: 15px solid #181818;
+    max-width: 90%;
+    min-width: 500px;
+}
+
+.ticket-status {
+    margin: 15px 0px;
+    font-weight: bold;
+}
+
+
+/* Stars on bottom border: centered group of 6, no border between stars */
+.ticket .wrapper-box.details::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+
+    pointer-events: none;
+}
+
+.ticket .details-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.ticket .details-row p {
+    flex: 1;
+}
+
+.ticket .star-strip {
+    position: relative;
+    font-size: 22.5px;
+    color: white;
+    letter-spacing: 0px;
+    line-height: 20px;
+    padding: 0 5px;
+    text-align: center;
+    width: fit-content;
+    background-color: #b51813;
+
+}
+
+.ticket .strip-container {
+    position: absolute;
+    width: 85%;
+    margin-top: -10px;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-cancel {
+    background: #cc3333;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.btn-cancel:hover {
+    background: #ff3333;
+    font-weight: bold;
+}
+
+.btn-cancel:active {
+    transform: scale(0.95);
 }

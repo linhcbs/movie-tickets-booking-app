@@ -110,10 +110,24 @@
             <p id="success-message">Bạn đã đặt vé thành công.</p>
             <div class="success-details">
                 <p><strong>Mã đơn hàng:</strong> <span id="order-id"></span></p>
-                <p><strong>Tổng tiền:</strong> <span id="order-total"></span> VND</p>
+                <p><strong>Phim:</strong> <span id="order-movie"></span></p>
+                <p><strong>Ngày chiếu:</strong> <span id="order-showtime"></span></p>
+                <p><strong>Phòng:</strong> <span id="order-room"></span></p>
+                <p><strong>Khách hàng:</strong> <span id="order-user"></span></p>
                 <p><strong>Ghế:</strong> <span id="order-seats"></span></p>
+                <p><strong>Tổng tiền:</strong> <span id="order-total"></span> VND</p>
             </div>
             <button class="btn-checkout" onclick="closeSuccessModal()">Quay lại trang chủ</button>
+        </div>
+    </div>
+
+    <div id="my-tickets-modal" class="modal hidden">
+        <div class="modal-content tickets-content">
+            <span class="close-btn" onclick="closeModal('my-tickets-modal')">&times;</span>
+            <h2>Danh Sách Vé Của Tôi</h2>
+            <div id="tickets-list" class="tickets-list">
+                <p style="text-align: center; padding: 20px;">Đang tải...</p>
+            </div>
         </div>
     </div>
 
