@@ -92,8 +92,8 @@ async function viewMyTickets() {
     // toolbar + content area so toggle can re-render only the content
     container.innerHTML = `
         <div id="tickets-toolbar" style="display:flex;/* justify-content:flex-end; */padding:8px;align-items: center;">
-            <input type="checkbox" id="show-cancelled-toggle" style="margin-right:6px;width: fit-content;">
-            <label style="font-size: 16px;">Hiện vé đã hủy</label>
+            <input type="checkbox" id="show-cancelled-toggle" style="margin-right:6px;width: fit-content; cursor: pointer;">
+            <label style="font-size: 16px; cursor: pointer;" for="show-cancelled-toggle">Hiện vé đã hủy</label>
         </div>
         <div id="tickets-content"><p style="text-align: center; padding: 20px;">Đang tải...</p></div>
     `;
@@ -152,7 +152,7 @@ async function viewMyTickets() {
                             ${ticket.TicketStatus == 'booked' ? 'Đã Đặt ✅' : 'Đã Hủy ❌'}
                         </div>
 
-                        <button class="btn-cancel" onclick="cancelTicket(${ticket.TicketID})" ${ticket.TicketStatus !== 'booked' ? 'disabled' : ''}>Hủy Vé</button>
+                        <button class="btn-cancel" onclick="cancelTicket(${ticket.TicketID}, this)" ${ticket.TicketStatus !== 'booked' ? 'disabled' : ''}>Hủy Vé</button>
                     </div>`;
 
                 content.appendChild(ticketDiv);
@@ -172,7 +172,7 @@ async function viewMyTickets() {
     }
 }
 
-async function cancelTicket(ticketId) {
+async function cancelTicket(ticketId, buttonEl) {
     if (!ticketId) {
         alert('Không tìm thấy mã vé');
         return;
@@ -180,6 +180,13 @@ async function cancelTicket(ticketId) {
 
     if (!confirm('Bạn có chắc muốn hủy vé này? Tiền sẽ được hoàn lại.')) {
         return;
+    }
+
+    // Disable button để tránh nhấn nhiều lần
+    if (buttonEl) {
+        buttonEl.disabled = true;
+        buttonEl.style.opacity = '0.5';
+        buttonEl.style.cursor = 'not-allowed';
     }
 
     try {
@@ -200,6 +207,13 @@ async function cancelTicket(ticketId) {
         }
     } catch (error) {
         alert('❌ Lỗi kết nối: ' + error.message);
+    } finally {
+        // Re-enable button
+        if (buttonEl) {
+            buttonEl.disabled = false;
+            buttonEl.style.opacity = '1';
+            buttonEl.style.cursor = 'pointer';
+        }
     }
 }
 
@@ -207,6 +221,14 @@ async function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
+
+    // Disable submit button to prevent multiple submissions
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+    }
 
     try {
         const response = await fetch('/api/customers/login/', {
@@ -230,6 +252,13 @@ async function handleLogin(e) {
         }
     } catch (error) {
         alert("Lỗi kết nối server: " + error.message);
+    } finally {
+        // Re-enable submit button
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+        }
     }
 }
 
@@ -244,6 +273,14 @@ async function handleRegister(e) {
     if (password !== confirmPass) {
         alert("Mật khẩu nhập lại không khớp!");
         return;
+    }
+
+    // Disable submit button to prevent multiple submissions
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
     }
 
     try {
@@ -273,6 +310,13 @@ async function handleRegister(e) {
         }
     } catch (error) {
         alert("Lỗi kết nối server: " + error.message);
+    } finally {
+        // Re-enable submit button
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+        }
     }
 }
 
@@ -417,7 +461,15 @@ async function handleBooking() {
         // Hiển thị loading
         const bookingBtn = document.getElementById('booking-btn');
         const loadingText = document.getElementById('booking-loading');
+        
+        // Check if button is already processing
+        if (bookingBtn.disabled) {
+            return;
+        }
+        
         bookingBtn.disabled = true;
+        bookingBtn.style.opacity = '0.5';
+        bookingBtn.style.cursor = 'not-allowed';
         loadingText.style.display = 'block';
         
         try {
@@ -437,6 +489,8 @@ async function handleBooking() {
                 if (!result.success) {
                     alert(result.error || "Đặt vé thất bại!");
                     bookingBtn.disabled = false;
+                    bookingBtn.style.opacity = '1';
+                    bookingBtn.style.cursor = 'pointer';
                     loadingText.style.display = 'none';
                     return;
                 }
@@ -458,10 +512,14 @@ async function handleBooking() {
             
             // Reset loading state
             bookingBtn.disabled = false;
+            bookingBtn.style.opacity = '1';
+            bookingBtn.style.cursor = 'pointer';
             loadingText.style.display = 'none';
         } catch (error) {
             alert("Lỗi kết nối server: " + error.message);
             bookingBtn.disabled = false;
+            bookingBtn.style.opacity = '1';
+            bookingBtn.style.cursor = 'pointer';
             loadingText.style.display = 'none';
         }
     }
