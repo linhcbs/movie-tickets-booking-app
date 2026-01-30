@@ -87,21 +87,40 @@ function updateUserPanel() {
 
 async function viewMyTickets() {
     openModal('my-tickets-modal');
-    
+
     const container = document.getElementById('tickets-list');
-    container.innerHTML = '<p style="text-align: center; padding: 20px;">Đang tải...</p>';
+    // toolbar + content area so toggle can re-render only the content
+    container.innerHTML = `
+        <div id="tickets-toolbar" style="display:flex;/* justify-content:flex-end; */padding:8px;align-items: center;">
+            <input type="checkbox" id="show-cancelled-toggle" style="margin-right:6px;width: fit-content;">
+            <label style="font-size: 16px;">Hiện vé đã hủy</label>
+        </div>
+        <div id="tickets-content"><p style="text-align: center; padding: 20px;">Đang tải...</p></div>
+    `;
 
     try {
         const response = await fetch(`/api/tickets/${currentUser.UserID}`);
         const result = await response.json();
-        
-        if (result.success && result.data.length > 0) {
-            container.innerHTML = '';
-            result.data.forEach(ticket => {
+        const allTickets = (result.success && Array.isArray(result.data)) ? result.data : [];
+
+        const content = document.getElementById('tickets-content');
+        const toggle = document.getElementById('show-cancelled-toggle');
+
+        function renderList() {
+            content.innerHTML = '';
+            const showCancelled = toggle && toggle.checked;
+
+            const ticketsToShow = showCancelled ? allTickets : allTickets.filter(t => t.TicketStatus === 'booked');
+
+            if (!ticketsToShow || ticketsToShow.length === 0) {
+                content.innerHTML = '<p style="text-align: center; padding: 20px;">Bạn chưa có vé nào.</p>';
+                return;
+            }
+
+            ticketsToShow.forEach(ticket => {
                 const ticketDiv = document.createElement('div');
                 ticketDiv.className = 'ticket-item';
                 ticketDiv.innerHTML = `
-
                 <div class="ticket">
                         <img src="./assets/ticket.png" alt="Ticket" class="ticket-image">
                         <div class="ticket-text">
@@ -134,14 +153,22 @@ async function viewMyTickets() {
                         </div>
 
                         <button class="btn-cancel" onclick="cancelTicket(${ticket.TicketID})" ${ticket.TicketStatus !== 'booked' ? 'disabled' : ''}>Hủy Vé</button>
-                    </div>                `;
-                container.appendChild(ticketDiv);
+                    </div>`;
+
+                content.appendChild(ticketDiv);
             });
-        } else {
-            container.innerHTML = '<p style="text-align: center; padding: 20px;">Bạn chưa có vé nào.</p>';
         }
+
+        // initial render: default hide cancelled
+        if (toggle) toggle.checked = false;
+        renderList();
+
+        // re-render when toggle changes
+        if (toggle) toggle.addEventListener('change', () => renderList());
+
     } catch (error) {
-        container.innerHTML = '<p style="text-align: center; padding: 20px; color: red;">Lỗi kết nối: ' + error.message + '</p>';
+        const content = document.getElementById('tickets-content');
+        content.innerHTML = '<p style="text-align: center; padding: 20px; color: red;">Lỗi kết nối: ' + error.message + '</p>';
     }
 }
 
