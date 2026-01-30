@@ -240,6 +240,8 @@ async function handleLogin(e) {
         const result = await response.json();
         if (result.success) {
             currentUser = result.data;
+            // Lưu thông tin người dùng vào localStorage
+            localStorage.setItem('currentUser', JSON.stringify(result.data));
             // console.log(currentUser)
             closeModal('login-modal');
             updateUserPanel();
@@ -323,6 +325,8 @@ async function handleRegister(e) {
 function logout() {
     if (confirm("Bạn có chắc muốn đăng xuất?")) {
         currentUser = null;
+        // Xoá thông tin người dùng khỏi localStorage
+        localStorage.removeItem('currentUser');
         updateUserPanel();
         window.location.reload();
     }
@@ -554,7 +558,20 @@ async function initializeApp() {
     dbSchedules = await fetchData('/api/schedules');
     dbUsers = [];
     dbTickets = [];
-    currentUser = null;
+    
+    // Khôi phục phiên đăng nhập từ localStorage
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+        } catch (error) {
+            console.error('Lỗi phân tích dữ liệu người dùng từ localStorage:', error);
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+        }
+    } else {
+        currentUser = null;
+    }
 
     renderMovies(dbMovies);
 }
