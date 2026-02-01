@@ -201,6 +201,83 @@
         </div>
     </div>
 
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content profile-content">
+            <span class="close-btn" onclick="closeModal('profile-modal')">&times;</span>
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <img id="profile-avatar-img" src="https://ui-avatars.com/api/?name=User&background=e50914&color=fff" alt="Avatar">
+                    </div>
+                    <div class="profile-header-info">
+                        <h2 id="profile-fullname"></h2>
+                        <p id="profile-username" class="username-text"></p>
+                        <p id="profile-email" class="email-text"></p>
+                    </div>
+                </div>
+
+                <div class="profile-tabs">
+                    <button class="tab-btn active" onclick="switchProfileTab('info')">Thông Tin</button>
+                    <button class="tab-btn" onclick="switchProfileTab('stats')">Thống Kê</button>
+                </div>
+
+                <div id="profile-tab-info" class="profile-tab active">
+                    <div class="profile-info-item">
+                        <label>Họ và Tên:</label>
+                        <p id="profile-display-fullname"></p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Tên Đăng Nhập:</label>
+                        <p id="profile-display-username"></p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Email:</label>
+                        <p id="profile-display-email"></p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Mã Người Dùng:</label>
+                        <p id="profile-display-userid"></p>
+                    </div>
+                    <button class="btn-checkout" style="margin-top: 20px;" onclick="openChangePasswordModal()">Đổi Mật Khẩu</button>
+                </div>
+
+                <div id="profile-tab-stats" class="profile-tab">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="profile-stat-total-tickets">0</div>
+                            <div class="stat-label">Tổng Vé Đã Đặt</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="profile-stat-active-tickets">0</div>
+                            <div class="stat-label">Vé Đang Hoạt Động</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="profile-stat-cancelled-tickets">0</div>
+                            <div class="stat-label">Vé Đã Hủy</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="profile-stat-total-spent">0 VND</div>
+                            <div class="stat-label">Tổng Chi Tiêu</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="change-password-modal" class="modal hidden">
+        <div class="modal-content auth-content">
+            <span class="close-btn" onclick="closeModal('change-password-modal')">&times;</span>
+            <h2>Đổi Mật Khẩu</h2>
+            <form onsubmit="handleChangePassword(event)">
+                <input type="password" id="current-password" placeholder="Mật khẩu hiện tại" required>
+                <input type="password" id="new-password" placeholder="Mật khẩu mới" required>
+                <input type="password" id="confirm-new-password" placeholder="Nhập lại mật khẩu mới" required>
+                <button type="submit" class="btn-checkout">Đổi Mật Khẩu</button>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 
     <footer class="site-footer">

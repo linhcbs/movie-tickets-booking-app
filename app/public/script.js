@@ -254,7 +254,7 @@ function updateUserPanel() {
         // TRƯỜNG HỢP 1: Đã đăng nhập -> Hiện tên, nút xem vé và nút Thoát
         panel.innerHTML = `
             <button class="btn-login" style="background:#0066cc" onclick="viewMyTickets()">Vé Của Tôi</button>
-            <span class="user-greeting">Xin chào, ${currentUser.Fullname}</span>
+            <span class="user-greeting" style="cursor: pointer;" onclick="openProfileModal()">${currentUser.Fullname}</span>
             <button class="btn-login" style="background:#555" onclick="logout()">Thoát</button>
         `;
     } else {
@@ -398,7 +398,127 @@ async function cancelTicket(ticketId, buttonEl) {
     }
 }
 
-async function handleLogin(e) {
+// --- PROFILE FUNCTIONS ---
+
+async function openProfileModal() {
+    if (!currentUser) return;
+    
+    openModal('profile-modal');
+    
+    // Populate header info
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.Fullname)}&background=e50914&color=fff`;
+    document.getElementById('profile-avatar-img').src = avatarUrl;
+    document.getElementById('profile-fullname').innerText = currentUser.Fullname;
+    document.getElementById('profile-username').innerText = `@${currentUser.Username}`;
+    document.getElementById('profile-email').innerText = currentUser.Email;
+    
+    // Populate info tab
+    document.getElementById('profile-display-fullname').innerText = currentUser.Fullname;
+    document.getElementById('profile-display-username').innerText = currentUser.Username;
+    document.getElementById('profile-display-email').innerText = currentUser.Email;
+    document.getElementById('profile-display-userid').innerText = currentUser.UserID;
+    
+    // Load and calculate stats
+    try {
+        const response = await fetch(`/api/tickets/${currentUser.UserID}`);
+        const result = await response.json();
+        const tickets = (result.success && Array.isArray(result.data)) ? result.data : [];
+        
+        const totalTickets = tickets.length;
+        const activeTickets = tickets.filter(t => t.TicketStatus === 'booked').length;
+        const cancelledTickets = tickets.filter(t => t.TicketStatus !== 'booked').length;
+        const totalSpent = tickets.reduce((sum, t) => sum + (t.TicketPrice || 0), 0);
+        
+        document.getElementById('profile-stat-total-tickets').innerText = totalTickets;
+        document.getElementById('profile-stat-active-tickets').innerText = activeTickets;
+        document.getElementById('profile-stat-cancelled-tickets').innerText = cancelledTickets;
+        document.getElementById('profile-stat-total-spent').innerText = totalSpent.toLocaleString() + ' VND';
+    } catch (error) {
+        console.error('Error loading ticket stats:', error);
+    }
+}
+
+function switchProfileTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    const tabElement = document.getElementById(`profile-tab-${tabName}`);
+    if (tabElement) {
+        tabElement.classList.add('active');
+    }
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+}
+
+function openChangePasswordModal() {
+    closeModal('profile-modal');
+    openModal('change-password-modal');
+}
+
+async function handleChangePassword(e) {
+    e.preventDefault();
+    
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-new-password').value;
+    
+    if (newPassword !== confirmPassword) {
+        alert('Mật khẩu mới không khớp!');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert('Mật khẩu mới phải có ít nhất 6 ký tự!');
+        return;
+    }
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+    }
+    
+    try {
+        const response = await fetch('/api/customers/change-password/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUser.UserID,
+                currentPassword,
+                newPassword
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ Đổi mật khẩu thành công!');
+            closeModal('change-password-modal');
+            // Clear inputs
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-new-password').value = '';
+        } else {
+            alert('❌ ' + (result.error || 'Đổi mật khẩu thất bại'));
+        }
+    } catch (error) {
+        alert('❌ Lỗi kết nối: ' + error.message);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+        }
+    }
+}async function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
