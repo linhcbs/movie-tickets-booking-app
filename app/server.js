@@ -326,6 +326,31 @@ app.post('/api/customers/login/', async (req, res) => {
     }
 });
 
+// Đổi mật khẩu
+app.post('/api/customers/change-password/', async (req, res) => {
+    const { userId, oldPassword, newPassword } = req.body;
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', sql.Int, userId)
+            .input('oldPassword', sql.NVarChar, oldPassword)
+            .input('newPassword', sql.NVarChar, newPassword)
+            .query(`
+                UPDATE Users 
+                SET Password = @newPassword 
+                WHERE UserID = @userId AND Password = @oldPassword
+            `);
+
+        if (result.rowsAffected[0] > 0) {
+            res.json({ success: true, message: "Đổi mật khẩu thành công!" });
+        } else {
+            res.status(400).json({ success: false, error: "Mật khẩu cũ không đúng!" });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // ==========================================
 // ROUTES
 // ==========================================

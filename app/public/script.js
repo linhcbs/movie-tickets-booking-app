@@ -476,11 +476,6 @@ async function handleChangePassword(e) {
         return;
     }
     
-    if (newPassword.length < 6) {
-        alert('Mật khẩu mới phải có ít nhất 6 ký tự!');
-        return;
-    }
-    
     const submitBtn = e.target.querySelector('button[type="submit"]');
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -493,7 +488,7 @@ async function handleChangePassword(e) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 userId: currentUser.UserID,
-                currentPassword,
+                oldPassword: currentPassword,
                 newPassword
             })
         });
