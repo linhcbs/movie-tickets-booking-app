@@ -26,9 +26,67 @@
     <main>
         <div class="section-header">
             <h2 id="page-title">Phim Đang Chiếu</h2>
-            <input type="text" id="search-box" placeholder="Tìm tên phim..." onkeyup="filterMovies()">
+            <input type="text" id="search-box" placeholder="Tìm tên phim..." onkeyup="applyFilters()">
         </div>
-        <div id="movie-container" class="movie-grid"></div>
+        <div class="movies-content">
+            <aside class="filter-sidebar">
+                <div class="filter-header">
+                    <h3>Bộ Lọc</h3>
+                    <button class="reset-filters-btn" onclick="resetFilters()">Đặt lại</button>
+                </div>
+
+                <!-- Filter: Genre -->
+                <div class="filter-group">
+                    <label class="filter-title">Thể Loại</label>
+                    <div id="genre-list" class="filter-options">
+                    </div>
+                </div>
+
+                <!-- Filter: Duration -->
+                <div class="filter-group">
+                    <label class="filter-title">Thời Lượng (phút)</label>
+                    <div class="range-input">
+                        <input type="range" id="duration-min" min="0" max="300" value="0" onchange="applyFilters()">
+                        <input type="range" id="duration-max" min="0" max="300" value="300" onchange="applyFilters()">
+                    </div>
+                    <div class="range-display">
+                        <span id="duration-min-display">0</span> - <span id="duration-max-display">300</span>
+                    </div>
+                </div>
+
+                <!-- Filter: Release Date -->
+                <div class="filter-group">
+                    <label class="filter-title">Ngày Chiếu</label>
+                    <input type="date" id="filter-date" onchange="applyFilters()">
+                </div>
+
+                <!-- Filter: Ticket Price -->
+                <div class="filter-group">
+                    <label class="filter-title">Giá Vé Đơn (VND)</label>
+                    <div class="range-input">
+                        <input type="range" id="price-min" min="0" max="200000" value="0" step="10000" onchange="applyFilters()">
+                        <input type="range" id="price-max" min="0" max="200000" value="200000" step="10000" onchange="applyFilters()">
+                    </div>
+                    <div class="range-display">
+                        <span id="price-min-display">0</span> - <span id="price-max-display">200000</span>
+                    </div>
+                </div>
+
+                <!-- Filter: Available Seats -->
+                <div class="filter-group">
+                    <label class="filter-title">Số Chỗ Trống</label>
+                    <div class="range-input">
+                        <input type="range" id="seats-min" min="0" max="80" value="0" onchange="applyFilters()">
+                        <input type="range" id="seats-max" min="0" max="80" value="80" onchange="applyFilters()">
+                    </div>
+                    <div class="range-display">
+                        <span id="seats-min-display">0</span> - <span id="seats-max-display">80</span>
+                    </div>
+                </div>
+            </aside>
+
+            <div id="movie-container" class="movie-grid"></div>
+        </div>
     </main>
 
     <div id="booking-modal" class="modal hidden">

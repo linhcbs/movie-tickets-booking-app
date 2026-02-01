@@ -65,6 +65,187 @@ function filterMovies() {
     });
 }
 
+// --- FILTER FUNCTIONS ---
+
+// Khởi tạo bộ lọc
+function initializeFilters() {
+    populateGenreFilter();
+    setupRangeDisplays();
+}
+
+// Lấy danh sách thể loại và tạo checkbox
+function populateGenreFilter() {
+    const genres = [...new Set(dbMovies.map(m => m.MovieCategory))].sort();
+    const genreList = document.getElementById('genre-list');
+    genreList.innerHTML = '';
+    
+    genres.forEach(genre => {
+        const div = document.createElement('div');
+        div.className = 'filter-option';
+        div.innerHTML = `
+            <input type="checkbox" id="genre-${genre}" value="${genre}" onchange="applyFilters()">
+            <label for="genre-${genre}">${genre}</label>
+        `;
+        genreList.appendChild(div);
+    });
+}
+
+// Cập nhật hiển thị giá trị range
+function setupRangeDisplays() {
+    // Duration
+    const durationMin = document.getElementById('duration-min');
+    const durationMax = document.getElementById('duration-max');
+    durationMin.addEventListener('input', () => {
+        document.getElementById('duration-min-display').innerText = durationMin.value;
+        if (parseInt(durationMin.value) > parseInt(durationMax.value)) {
+            durationMax.value = durationMin.value;
+            document.getElementById('duration-max-display').innerText = durationMax.value;
+        }
+    });
+    durationMax.addEventListener('input', () => {
+        document.getElementById('duration-max-display').innerText = durationMax.value;
+        if (parseInt(durationMax.value) < parseInt(durationMin.value)) {
+            durationMin.value = durationMax.value;
+            document.getElementById('duration-min-display').innerText = durationMin.value;
+        }
+    });
+
+    // Price
+    const priceMin = document.getElementById('price-min');
+    const priceMax = document.getElementById('price-max');
+    priceMin.addEventListener('input', () => {
+        document.getElementById('price-min-display').innerText = parseInt(priceMin.value).toLocaleString();
+        if (parseInt(priceMin.value) > parseInt(priceMax.value)) {
+            priceMax.value = priceMin.value;
+            document.getElementById('price-max-display').innerText = parseInt(priceMax.value).toLocaleString();
+        }
+    });
+    priceMax.addEventListener('input', () => {
+        document.getElementById('price-max-display').innerText = parseInt(priceMax.value).toLocaleString();
+        if (parseInt(priceMax.value) < parseInt(priceMin.value)) {
+            priceMin.value = priceMax.value;
+            document.getElementById('price-min-display').innerText = parseInt(priceMin.value).toLocaleString();
+        }
+    });
+
+    // Seats
+    const seatsMin = document.getElementById('seats-min');
+    const seatsMax = document.getElementById('seats-max');
+    seatsMin.addEventListener('input', () => {
+        document.getElementById('seats-min-display').innerText = seatsMin.value;
+        if (parseInt(seatsMin.value) > parseInt(seatsMax.value)) {
+            seatsMax.value = seatsMin.value;
+            document.getElementById('seats-max-display').innerText = seatsMax.value;
+        }
+    });
+    seatsMax.addEventListener('input', () => {
+        document.getElementById('seats-max-display').innerText = seatsMax.value;
+        if (parseInt(seatsMax.value) < parseInt(seatsMin.value)) {
+            seatsMin.value = seatsMax.value;
+            document.getElementById('seats-min-display').innerText = seatsMin.value;
+        }
+    });
+}
+
+// Áp dụng tất cả bộ lọc
+function applyFilters() {
+    const searchTerm = document.getElementById('search-box').value.toLowerCase();
+    
+    // Lấy các thể loại được chọn
+    const selectedGenres = [];
+    document.querySelectorAll('#genre-list input:checked').forEach(input => {
+        selectedGenres.push(input.value);
+    });
+    
+    // Lấy các giá trị range
+    const durationMin = parseInt(document.getElementById('duration-min').value);
+    const durationMax = parseInt(document.getElementById('duration-max').value);
+    const priceMin = parseInt(document.getElementById('price-min').value);
+    const priceMax = parseInt(document.getElementById('price-max').value);
+    const seatsMin = parseInt(document.getElementById('seats-min').value);
+    const seatsMax = parseInt(document.getElementById('seats-max').value);
+    const filterDate = document.getElementById('filter-date').value;
+    
+    // Lọc danh sách phim
+    let filteredMovies = dbMovies.filter(movie => {
+        // Filter by search term
+        if (searchTerm && !movie.MovieName.toLowerCase().includes(searchTerm)) {
+            return false;
+        }
+        
+        // Filter by genre
+        if (selectedGenres.length > 0 && !selectedGenres.includes(movie.MovieCategory)) {
+            return false;
+        }
+        
+        // Filter by duration
+        if (movie.MovieDuration < durationMin * 60 || movie.MovieDuration > durationMax * 60) {
+            return false;
+        }
+        
+        // Filter by date (kiểm tra nếu có suất chiếu vào ngày được chọn)
+        if (filterDate) {
+            const selectedSchedules = dbSchedules.filter(s => 
+                s.MovieID === movie.MovieID && 
+                new Date(s.Showtime).toISOString().split('T')[0] === filterDate
+            );
+            if (selectedSchedules.length === 0) {
+                return false;
+            }
+        }
+        
+        // Filter by price (kiểm tra nếu có suất chiếu trong khoảng giá)
+        const movieSchedules = dbSchedules.filter(s => s.MovieID === movie.MovieID);
+        const priceMatch = movieSchedules.some(s => s.TicketPrice >= priceMin && s.TicketPrice <= priceMax);
+        if (movieSchedules.length > 0 && !priceMatch) {
+            return false;
+        }
+        
+        // Filter by available seats
+        const seatsMatch = movieSchedules.some(s => s.AvailableSeats >= seatsMin && s.AvailableSeats <= seatsMax);
+        if (movieSchedules.length > 0 && !seatsMatch) {
+            return false;
+        }
+        
+        return true;
+    });
+    
+    renderMovies(filteredMovies);
+}
+
+// Đặt lại tất cả bộ lọc
+function resetFilters() {
+    // Reset search
+    document.getElementById('search-box').value = '';
+    
+    // Reset genre checkboxes
+    document.querySelectorAll('#genre-list input').forEach(input => {
+        input.checked = false;
+    });
+    
+    // Reset range inputs
+    document.getElementById('duration-min').value = 0;
+    document.getElementById('duration-max').value = 300;
+    document.getElementById('duration-min-display').innerText = 0;
+    document.getElementById('duration-max-display').innerText = 300;
+    
+    document.getElementById('price-min').value = 0;
+    document.getElementById('price-max').value = 200000;
+    document.getElementById('price-min-display').innerText = '0';
+    document.getElementById('price-max-display').innerText = '200000';
+    
+    document.getElementById('seats-min').value = 0;
+    document.getElementById('seats-max').value = 80;
+    document.getElementById('seats-min-display').innerText = 0;
+    document.getElementById('seats-max-display').innerText = 80;
+    
+    // Reset date
+    document.getElementById('filter-date').value = '';
+    
+    // Apply empty filters
+    renderMovies(dbMovies);
+}
+
 // --- LOGIC AUTHENTICATION (Đăng nhập / Đăng ký) ---
 
 function updateUserPanel() {
@@ -574,6 +755,7 @@ async function initializeApp() {
     }
 
     renderMovies(dbMovies);
+    initializeFilters();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
