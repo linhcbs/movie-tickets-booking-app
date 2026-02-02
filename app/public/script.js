@@ -30,6 +30,102 @@ let currentMovie = null;
 let currentSchedule = null;
 let selectedSeats = [];
 
+// --- SLIDESHOW FUNCTIONS ---
+
+let currentSlideIndex = 0;
+let slideshowInterval = null;
+const SLIDESHOW_INTERVAL = 3000;
+
+function initializeSlideshow() {
+    const slideshowElement = document.getElementById('slideshow');
+    const dotsContainer = document.querySelector('.slide-dots');
+    
+    // Xóa nội dung cũ
+    slideshowElement.innerHTML = '';
+    dotsContainer.innerHTML = '';
+    
+    // Chọn phim hàng đầu cho slideshow (tối đa 5 phim)
+    const topMovies = dbMovies.slice(0, 5);
+    
+    if (topMovies.length === 0) return; // Nếu không có phim, thoát
+    
+    // Tạo slides
+     const banner = ['https://w0.peakpx.com/wallpaper/156/622/HD-wallpaper-avengers-endgame-all-characters-superheroes-movies.jpg', 'https://wallpapercave.com/wp/wp383267.jpg', 'https://wallpapers.com/images/featured/inception-bkf779zurr4brgsy.jpg', 'https://wallpapercat.com/w/full/5/a/0/306069-3840x2160-desktop-4k-interstellar-wallpaper.jpg', 'https://w0.peakpx.com/wallpaper/191/587/HD-wallpaper-movie-parasite.jpg']; // bad practice
+
+    topMovies.forEach((movie, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'slide' + (index === 0 ? ' active' : '');
+        slide.innerHTML = `
+            <img src="${banner[index]}" onerror="this.src='https://placeholder.co/1200x600?text=No+Image'" alt="${movie.MovieName}">
+            <div class="slide-overlay">
+                <h2 class="slide-title">${movie.MovieName}</h2>
+                <p class="slide-category">${movie.MovieCategory}</p>
+            </div>
+        `;
+        slideshowElement.appendChild(slide);
+        
+        // Tạo dot
+        const dot = document.createElement('button');
+        dot.className = 'dot' + (index === 0 ? ' active' : '');
+        dot.onclick = (e) => {
+            e.preventDefault();
+            goToSlide(index);
+        };
+        dotsContainer.appendChild(dot);
+    });
+    
+    // Bắt đầu tự động chuyển slide
+    startAutoSlideshow();
+}
+
+function startAutoSlideshow() {
+    if (slideshowInterval) {
+        clearInterval(slideshowInterval);
+    }
+    slideshowInterval = setInterval(nextSlide, SLIDESHOW_INTERVAL);
+}
+
+function stopAutoSlideshow() {
+    if (slideshowInterval) {
+        clearInterval(slideshowInterval);
+        slideshowInterval = null;
+    }
+}
+
+function goToSlide(index) {
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    
+    // Đảm bảo index hợp lệ
+    if (index < 0) {
+        currentSlideIndex = slides.length - 1;
+    } else if (index >= slides.length) {
+        currentSlideIndex = 0;
+    } else {
+        currentSlideIndex = index;
+    }
+    
+    // Cập nhật slides
+    slides.forEach(slide => slide.classList.remove('active'));
+    slides[currentSlideIndex].classList.add('active');
+    
+    // Cập nhật dots
+    dots.forEach(dot => dot.classList.remove('active'));
+    dots[currentSlideIndex].classList.add('active');
+    
+    // Khởi động lại timer
+    stopAutoSlideshow();
+    startAutoSlideshow();
+}
+
+function nextSlide() {
+    goToSlide(currentSlideIndex + 1);
+}
+
+function prevSlide() {
+    goToSlide(currentSlideIndex - 1);
+}
+
 // --- LOGIC GIAO DIỆN CHÍNH ---
 
 // hiển thị danh sách phim
@@ -871,6 +967,7 @@ async function initializeApp() {
 
     renderMovies(dbMovies);
     initializeFilters();
+    initializeSlideshow();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -24,6 +24,18 @@
     </header>
 
     <main>
+        <!-- Slideshow Banner -->
+        <div class="slideshow-container">
+            <div id="slideshow" class="slideshow">
+                <!-- Slides will be dynamically inserted here -->
+            </div>
+            <button class="slide-nav prev" onclick="prevSlide()">&#10094;</button>
+            <button class="slide-nav next" onclick="nextSlide()">&#10095;</button>
+            <div class="slide-dots">
+                <!-- Dots will be dynamically inserted here -->
+            </div>
+        </div>
+
         <div class="section-header">
             <h2 id="page-title">Phim Đang Chiếu</h2>
             <input type="text" id="search-box" placeholder="Tìm tên phim..." onkeyup="applyFilters()">
